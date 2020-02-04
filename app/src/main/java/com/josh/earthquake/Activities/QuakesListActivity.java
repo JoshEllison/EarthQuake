@@ -25,7 +25,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class QuakesListActivity extends AppCompatActivity {
     private ArrayList<String> arrayList;
@@ -46,20 +45,28 @@ public class QuakesListActivity extends AppCompatActivity {
         listView = (ListView) findViewById(R.id.listview);
         arrayList = new ArrayList<>();
 
-        sendRequest(Constants.URL);
+        //Instantiate the RequestQueue and add the request to the queue
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(sendRequest(Constants.URL));
+
     }
 
     //broke up getAllQuakes into 3 separate testable pieces
 
-    public void sendRequest(String url) {
+    public JsonObjectRequest sendRequest(String url) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, url, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        FinalJSonObject = response;
+                        JSONArray jsonArray = null;
+                        try {
+                            jsonArray = response.getJSONArray("features");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
-                        parseJson();
+                        parseJson(jsonArray);
 
                     }
                 }, new Response.ErrorListener() {
@@ -70,35 +77,34 @@ public class QuakesListActivity extends AppCompatActivity {
 
                     }
                 });
-        //Instantiate the RequestQueue and add the request to the queue
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(jsonObjectRequest);
+
+        return jsonObjectRequest;
     }
 
     //populates arrayList to listView
     public void createAdapter() {
-        arrayAdapter = new ArrayAdapter<>(QuakesListActivity.this, android.R.layout.simple_list_item_1,
-                            android.R.id.text1, arrayList);
-                    listView.setAdapter(arrayAdapter);
+        arrayAdapter = new ArrayAdapter<>(QuakesListActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1,
+                arrayList);
+        listView.setAdapter(arrayAdapter);
 
-                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            Toast.makeText(getApplicationContext(), "Clicked " + position, Toast.LENGTH_LONG).show();
-                        }
-                    });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getApplicationContext(), "Clicked " + position, Toast.LENGTH_LONG).show();
+            }
+        });
 
-                    arrayAdapter.notifyDataSetChanged();
+        arrayAdapter.notifyDataSetChanged();
     }
 
 
     //parse the JSonObject
-    public void parseJson() {
+    public void parseJson(JSONArray jsonArray) {
 
         EarthQuake earthQuake = new EarthQuake();
         try {
 
-            JSONArray jsonArray = FinalJSonObject.getJSONArray("features");
+
             for (int i = 0; i < Constants.LIMIT; i++) {
 
                 JSONObject properties = jsonArray.getJSONObject(i).getJSONObject("properties");
@@ -126,6 +132,7 @@ public class QuakesListActivity extends AppCompatActivity {
             }
 
             createAdapter();
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
