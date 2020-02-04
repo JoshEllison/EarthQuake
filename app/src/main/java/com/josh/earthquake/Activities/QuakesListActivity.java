@@ -27,13 +27,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class QuakesListActivity extends AppCompatActivity {
-    private ArrayList<String> arrayList;
     private ListView listView;
-    private RequestQueue queue;
     private ArrayAdapter arrayAdapter;
-    private TextView textView;
-    private JSONObject FinalJSonObject;
+    private TextView textView; //only used on error response maybe change to toast?
 
+//    private JSONObject FinalJSonObject;
+//    private ArrayList<String> arrayList;
+//    private RequestQueue queue;
     public QuakesListActivity() {
     }
 
@@ -41,9 +41,9 @@ public class QuakesListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quakes_list);
-
         listView = (ListView) findViewById(R.id.listview);
-        arrayList = new ArrayList<>();
+
+//        arrayList = new ArrayList<>();
 
         //Instantiate the RequestQueue and add the request to the queue
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -82,9 +82,9 @@ public class QuakesListActivity extends AppCompatActivity {
     }
 
     //populates arrayList to listView
-    public void createAdapter() {
+    public void createAdapter(ArrayList arrayList2) {
         arrayAdapter = new ArrayAdapter<>(QuakesListActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1,
-                arrayList);
+                arrayList2);
         listView.setAdapter(arrayAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -99,14 +99,12 @@ public class QuakesListActivity extends AppCompatActivity {
 
 
     //parse the JSonObject
-    public void parseJson(JSONArray jsonArray) {
+    public ArrayList parseJson(JSONArray jsonArray) {
+        ArrayList arrayList2 = new ArrayList<>();
 
-        EarthQuake earthQuake = new EarthQuake();
         try {
-
-
             for (int i = 0; i < Constants.LIMIT; i++) {
-
+                EarthQuake earthQuake = new EarthQuake();
                 JSONObject properties = jsonArray.getJSONObject(i).getJSONObject("properties");
 
                 //get coordinates
@@ -128,14 +126,16 @@ public class QuakesListActivity extends AppCompatActivity {
                 earthQuake.setLon(lon);
                 earthQuake.setLat(lat);
 
-                arrayList.add(earthQuake.getPlace());
+//                arrayList.add(earthQuake.getPlace());
+                arrayList2.add(earthQuake.getPlace());
             }
 
-            createAdapter();
+            createAdapter(arrayList2);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return arrayList2;
     }
 
 
