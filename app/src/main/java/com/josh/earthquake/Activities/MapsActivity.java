@@ -47,6 +47,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnMarkerClickListener {
@@ -58,7 +59,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog dialog;
     private BitmapDescriptor[] iconColors;
-    private Button showListBtn;
 
 
     @Override
@@ -68,9 +68,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
-        showListBtn = (Button) findViewById(R.id.showListBtn);
+        Button showListBtn = (Button) findViewById(R.id.showListBtn);
 
         showListBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,14 +97,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getEarthQuakes();
     }
 
-
-
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -154,6 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // we have permission!
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
                 Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                assert location != null;
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.addMarker(new MarkerOptions()
                         .position(latLng)
@@ -221,7 +219,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 earthQuake.setDetailLink(properties.getString("detail"));
 
                                 java.text.DateFormat dateFormat = java.text.DateFormat.getDateInstance();
-                                String formattedDate =  dateFormat.format(new Date(Long.valueOf(properties.getLong("time")))
+                                String formattedDate =  dateFormat.format(new Date(properties.getLong("time"))
                                         .getTime());
 
                                 MarkerOptions markerOptions = new MarkerOptions();
@@ -271,10 +269,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        getQuakeDetails(marker.getTag().toString());
-
-//        Toast.makeText(getApplicationContext(), marker.getTag().toString(), Toast.LENGTH_LONG)
-//                .show();
+        getQuakeDetails(Objects.requireNonNull(marker.getTag()).toString());
 
     }
 
@@ -301,8 +296,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         detailsUrl = geoJsonObj.getString("url");
 
                     }
-
-//                    Log.d("URL: ", detailsUrl);
                     getMoreDetails(detailsUrl);
 
 
@@ -339,11 +332,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 try {
                     //make sure summary is there and populated
-                    if (response.has("tectonicSummary") && response.getString("tectonicSummary") != null) {
+                    if (response.has("tectonicSummary")) {
+                        response.getString("tectonicSummary");
 
                         JSONObject tectonic = response.getJSONObject("tectonicSummary");
 
-                        if (tectonic.has("text") && tectonic.getString("text") != null) {
+                        if (tectonic.has("text")) {
+                            tectonic.getString("text");
 
                             String text = tectonic.getString("text");
 

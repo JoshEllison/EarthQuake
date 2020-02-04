@@ -33,25 +33,18 @@ public class QuakesListActivity extends AppCompatActivity {
     private RequestQueue queue;
     private ArrayAdapter arrayAdapter;
     private TextView textView;
-
-
     private JSONObject FinalJSonObject;
+
+    public QuakesListActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quakes_list);
 
-
         listView = (ListView) findViewById(R.id.listview);
-
-
-        //Instantiate the RequestQue
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-
         arrayList = new ArrayList<>();
-
 
         sendRequest(Constants.URL);
     }
@@ -82,7 +75,7 @@ public class QuakesListActivity extends AppCompatActivity {
         queue.add(jsonObjectRequest);
     }
 
-    //
+    //populates arrayList to listView
     public void createAdapter() {
         arrayAdapter = new ArrayAdapter<>(QuakesListActivity.this, android.R.layout.simple_list_item_1,
                             android.R.id.text1, arrayList);
@@ -129,9 +122,7 @@ public class QuakesListActivity extends AppCompatActivity {
                 earthQuake.setLon(lon);
                 earthQuake.setLat(lat);
 
-
                 arrayList.add(earthQuake.getPlace());
-
             }
 
             createAdapter();
