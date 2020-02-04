@@ -406,5 +406,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onMarkerClick(Marker marker) {
         return false;
     }
-}
 
+}
