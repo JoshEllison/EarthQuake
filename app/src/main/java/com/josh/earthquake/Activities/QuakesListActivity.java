@@ -30,7 +30,6 @@ public class QuakesListActivity extends AppCompatActivity {
     private ListView listView;
     private TextView textView; //only used on error response maybe change to toast?
 
-
     public QuakesListActivity() {
     }
 
@@ -39,46 +38,41 @@ public class QuakesListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quakes_list);
         listView = (ListView) findViewById(R.id.listview);
-
         //Instantiate the RequestQueue and add the request to the queue
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(sendRequest(Constants.URL));
     }
 
     public JsonObjectRequest sendRequest(String url) {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, new Response.Listener<JSONObject>() {
 
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        JSONArray jsonArray = null;
-                        try {
-                            jsonArray = response.getJSONArray("features");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+        return new JsonObjectRequest
+            (Request.Method.GET, url, new Response.Listener<JSONObject>() {
 
-                        createAdapter(parseJson(jsonArray));
-
+                @Override
+                public void onResponse(JSONObject response) {
+                    JSONArray jsonArray = null;
+                    try {
+                        jsonArray = response.getJSONArray("features");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
+                    createAdapter(parseJson(jsonArray));
+                }
+            }, new Response.ErrorListener() {
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        textView.setText("Oops! That Didn't Work!");
-
-                    }
-                });
-
-        return jsonObjectRequest;
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    textView.setText("Oops! That Didn't Work!");
+                }
+            });
     }
 
-    //populates arrayList to listView
-    public void createAdapter(ArrayList<String> arrayList2) {
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(QuakesListActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1,
-                arrayList2);
-        listView.setAdapter(arrayAdapter);
 
+    //populates arrayList to listView
+    public void createAdapter(ArrayList<String> earthQuakeObject) {
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(QuakesListActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1,
+                earthQuakeObject);
+        listView.setAdapter(arrayAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -91,24 +85,23 @@ public class QuakesListActivity extends AppCompatActivity {
 
     //parse the JSonObject
     public ArrayList<String> parseJson(JSONArray jsonArray) {
-        ArrayList<String> arrayList2 = new ArrayList<String>();
+        ArrayList<String> earthQuakeObject = new ArrayList<String>();
 
+        if (jsonArray == null || jsonArray.length() <= 0) {
+            return earthQuakeObject;
+        }
         try {
             for (int i = 0; i < Constants.LIMIT; i++) {
                 EarthQuake earthQuake = new EarthQuake();
                 JSONObject properties = jsonArray.getJSONObject(i).getJSONObject("properties");
 
                 //get coordinates
-
                 JSONObject geometry = jsonArray.getJSONObject(i).getJSONObject("geometry");
 
                 //get coordinates array
                 JSONArray coordinates = geometry.getJSONArray("coordinates");
-
                 double lon = coordinates.getDouble(0);
                 double lat = coordinates.getDouble(1);
-                //  Log.d("Lat", properties.getString("place"));
-
 
                 //Setup EarthQuake Object
                 earthQuake.setPlace(properties.getString("place"));
@@ -116,15 +109,12 @@ public class QuakesListActivity extends AppCompatActivity {
                 earthQuake.setTime(properties.getLong("time"));
                 earthQuake.setLon(lon);
                 earthQuake.setLat(lat);
-
-//                arrayList.add(earthQuake.getPlace());
-                arrayList2.add(earthQuake.getPlace());
+                earthQuakeObject.add(earthQuake.getPlace());
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return arrayList2;
+        return earthQuakeObject;
     }
-
 }
